@@ -79,28 +79,30 @@ def generate_clock(hour, minute):
     return image
 
 
-def generate_clock_image_data(number_of_images, save_folder_path="./dataset"):
+def generate_clock_image_data(number_of_images, root_path = "./dataset", save_folder="clock_images"):
     # save images to disk and hour / minute labels to json file
 
-    os.makedirs(f"{save_folder_path}/clock_images", exist_ok=True)
+    save_folder_path = os.path.join(root_path, save_folder)
+
+    os.makedirs(save_folder_path, exist_ok=True)
     data_info_list = []
 
     for i in range(number_of_images):
-        hour = np.random.randint(1, 13)
-        minute = np.random.randint(1, 61)
+        hour = np.random.randint(1, 13) # 1 to 12
+        minute = np.random.randint(0, 60) # 0 to 59
         img = generate_clock(hour, minute)
 
-        cv2.imwrite(f"{save_folder_path}/clock_images/{i}.png", img)
+        cv2.imwrite(f"{save_folder_path}/{i}.jpg", img)
 
         data_info = {
-            "image_path": f"clock_images/{i}.png",
+            "image": f"{i}.jpg",
             "hour": hour,
             "minute": minute
         }
 
         data_info_list.append(data_info)
 
-    json_file_path = f"{save_folder_path}/data_info.json"
+    json_file_path = f"{root_path}/data_info.json"
 
     # use json for convenience
     with open(json_file_path, "w") as output_file:
@@ -109,10 +111,10 @@ def generate_clock_image_data(number_of_images, save_folder_path="./dataset"):
 
 if __name__ == "__main__":
 
-    # generate_clock_image_data(3000)  # generate 30000 images
+    #generate_clock_image_data(3000)  # generate 3000 images
 
     # example
-    img = generate_clock(11, 60)
+    img = generate_clock(11, 00)
     cv2.imshow("image", img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
