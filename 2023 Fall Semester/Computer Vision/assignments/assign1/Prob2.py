@@ -24,7 +24,10 @@ class CNN_Model(nn.Module):
         self.minute_fc = nn.Linear(in_features, num_classes_minute)
 
     def forward(self, x):
+        # get features from backbone
         x = self.resnet(x)
+        
+        # predict hour and minute
         hour_output = self.hour_fc(x)
         minute_output = self.minute_fc(x)
         return hour_output, minute_output

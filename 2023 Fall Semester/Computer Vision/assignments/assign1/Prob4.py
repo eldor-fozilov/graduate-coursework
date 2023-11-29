@@ -41,7 +41,7 @@ transform = transforms.Compose([
                                  std=[0.229, 0.224, 0.225]) # ImageNet mean and std (we use this because we use a pretrained model)
 ])
 
-image_path = "provided_clock_examples/3.jpg" # example single image path
+image_path = "dataset/clock_images/1.jpg" # example single image path
 
 predicted_hour, predicted_minute = test_model(model, image_path, transform)
 

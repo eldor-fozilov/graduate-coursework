@@ -9,6 +9,9 @@ from Prob2 import CNN_Model
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 
+torch.manual_seed(7) # set seed for reproducibility
+
+
 class ClockDataset(Dataset):
     def __init__(self, root_path, image_folder, json_file, transform=None):
 
@@ -58,14 +61,14 @@ transform = transforms.Compose([
 
 # Hyperparameters
 LEARNING_RATE = 0.001
-NUM_EPOCHS = 30
+NUM_EPOCHS = 10
 BATCH_SIZE = 32
 
 # load dataset
 dataset = ClockDataset(root_path, image_folder, json_file, transform=transform)
 
 # split dataset into train and test sets
-train_set, test_set = torch.utils.data.random_split(dataset, [2400, 600])
+train_set, test_set = torch.utils.data.random_split(dataset, [3000, 2000])
 train_loader = DataLoader(train_set, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
 test_loader = DataLoader(test_set, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
 

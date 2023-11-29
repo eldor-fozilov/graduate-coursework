@@ -4,6 +4,8 @@ import math
 import os
 import json
 
+# set random seed for reproducibility
+np.random.seed(7)
 
 def generate_clock(hour, minute):
 
@@ -22,7 +24,7 @@ def generate_clock(hour, minute):
     # add random noise (optional)
     add_random_noise = np.random.rand() > 0.5
     if add_random_noise:
-        noise = np.random.normal(0, 0.5, img_size).astype(np.uint8)
+        noise = np.random.normal(0, 0.7, img_size).astype(np.uint8)
         image = cv2.add(image, noise)
 
     # clock hands
@@ -111,10 +113,10 @@ def generate_clock_image_data(number_of_images, root_path = "./dataset", save_fo
 
 if __name__ == "__main__":
 
-    #generate_clock_image_data(3000)  # generate 3000 images
+    generate_clock_image_data(5000)  # generate 5000 images
 
     # example
-    img = generate_clock(11, 00)
-    cv2.imshow("image", img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # img = generate_clock(11, 00)
+    # cv2.imshow("image", img)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
