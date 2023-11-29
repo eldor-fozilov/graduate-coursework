@@ -9,7 +9,7 @@ def test_model(image_path):
 
     # load model
     model = CNN_Model()
-    model.load_state_dict(torch.load("checkpoints/Prob3.pth"))
+    model.load_state_dict(torch.load("Prob3.pth"))
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
    
