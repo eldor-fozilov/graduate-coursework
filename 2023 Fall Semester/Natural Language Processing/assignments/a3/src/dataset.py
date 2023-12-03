@@ -2,6 +2,7 @@ import random
 import torch
 from torch.utils.data import Dataset
 import argparse
+import math
 
 """
 The input-output pairs (x, y) of the NameDataset are of the following form:
@@ -168,7 +169,31 @@ class CharCorruptionDataset(Dataset):
 
     def __getitem__(self, idx):
         # TODO [part e]: see spec above
-        raise NotImplementedError
+        
+        # truncate details
+        docoment = self.data[idx]
+        truncate_len = int(torch.randint(4, int(self.block_size * 7/8) + 1, size=(1,))[0]) #random.randint(4, int(self.block_size*7/8))
+        truncated_docoment = docoment[:truncate_len]
+
+        # masked content details
+        average_len = int(truncate_len / 4)
+        masked_content_index = int(torch.randint(0, truncate_len - average_len  + 1, size=(1,))[0])
+        masked_content_len = int(torch.randint(math.ceil(average_len / 2), average_len * 2, size=(1,))[0])
+        
+        # prepare final string
+        prefix = truncated_docoment[:masked_content_index]
+        masked_content = truncated_docoment[masked_content_index : (masked_content_index + masked_content_len)]
+        suffix = truncated_docoment[(masked_content_index + masked_content_len):]
+        
+        string = prefix + self.MASK_CHAR + suffix + self.MASK_CHAR + masked_content
+        masked_string = string + self.PAD_CHAR * (self.block_size - len(string) + 1)
+
+        x = masked_string[:-1]
+        y = masked_string[1:]
+        
+        x = torch.tensor([self.stoi[c] for c in x], dtype=torch.long)
+        y = torch.tensor([self.stoi[c] for c in y], dtype=torch.long)
+        return x, y
 
 """
 Code under here is strictly for your debugging purposes; feel free to modify
