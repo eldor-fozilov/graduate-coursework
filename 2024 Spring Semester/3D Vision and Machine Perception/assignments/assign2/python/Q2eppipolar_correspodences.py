@@ -38,14 +38,61 @@ class Q2(Q1):
     def epipolar_correspondences(self, im1, im2, F, pts1):
         """
         Write your own code here 
-
-
-        
-
-        replace pass by your implementation
         """
-        pass
-    
+        pts2 = np.zeros_like(pts1)
+        
+        # Convert to homogeneous coordinates
+        pts1 = np.hstack((pts1, np.ones((pts1.shape[0], 1))))
+        
+        window_size = 10
+        H, W = im1.shape[:2]
+        N = pts1.shape[0]
+        
+        for i in range(N):
+            u = pts1[i] # homogeneous coordinates of the point in image 1
+            u = u.astype(int)
+            line_coeff = F @ u
+            a, b, c = line_coeff
+          
+            # Choose candidate points in the epipolar line
+            
+            if b == 0:
+                y = np.arange(H)
+                x = (-c - b * y) / a
+                mask = (x >= 0) & (x < W)
+            else:
+                x = np.arange(W)
+                y = (-a * x - c) / b
+                mask = (y >= 0) & (y < H)
+            
+            x = x[mask].astype(int)
+            y = y[mask].astype(int)
+       
+            # Compute the distance between the point in image 1 and the candidate points
+            source_patch = im1[u[1] - window_size : u[1] + window_size,
+                                         u[0] - window_size: u[0] + window_size]
+            distances = np.zeros_like(x).astype(float)           
+            for j in range(len(x)):
+                
+                x_candidate_idx = x[j]
+                y_candidate_idx = y[j]
+                                
+                # Compute the sum of squared differences
+                candidate_patch = im2[y_candidate_idx - window_size : y_candidate_idx + window_size,
+                                         x_candidate_idx - window_size : x_candidate_idx + window_size]
+                
+                if candidate_patch.shape != source_patch.shape:
+                    distances[j] = np.inf
+                    continue
+                
+                distances[j] = np.sum((source_patch - candidate_patch)**2) # Euclidean distance
+            
+            # choose the point with the smallest distance
+            idx = np.argmin(distances)
+            pts2[i] = [x[idx], y[idx]]
+             
+            
+        return pts2
 
     def epipolarMatchGUI(self, I1, I2, F):
         sy, sx, sd = I2.shape

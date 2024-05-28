@@ -57,31 +57,29 @@ class Q1:
                     pts1[i, 1], pts2[i, 0], pts2[i, 1], 1]
             
         # Compute the SVD of A
-        U, S, V = np.linalg.svd(A)
-        F = V[-1].reshape(3, 3)
+        U, S, V_T = np.linalg.svd(A)
+        F = V_T[-1].reshape([3, 3])
         # Compute the SVD of F
-        u, s, v = np.linalg.svd(F)
+        u, s, v_t = np.linalg.svd(F)
         # Set the rank of F to 2
         s[2] = 0
         # Reconstruct F
-        F = u @ np.dot(np.diag(s), v)
-        # Refine F
+        F = u @ np.dot(np.diag(s), v_t)
+        # Refine F before unnormalization
         F = hlp.refineF(F, pts1, pts2)
         # Unnormalize the fundamental matrix
         T = np.diag([1 / M, 1 / M , 1]) # transformation matrix
         F = T.T @ np.dot(F, T)
-        
-        print("-"*50)
-        print("Recovered Fundamental Matrix")
-        print(F)
-        print("-"*50)
-        
         return F
 
 
 if __name__ == "__main__":
 
     Q1 = Q1()
+    print("-"*50)
+    print("Recovered Fundamental Matrix")
+    print(Q1.F)
+    print("-"*50)
     hlp.displayEpipolarF(Q1.im1, Q1.im2, Q1.F)
 
 

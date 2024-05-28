@@ -18,6 +18,11 @@ class Q3(Q2):
             - E = self.essential_matrix(self.F, K1, K2)
 
         """
+        
+        intrin_matrices = np.load('../data/intrinsics.npz')
+        K1 = intrin_matrices['K1']
+        K2 = intrin_matrices['K2']
+        E = self.essential_matrix(self.F, K1, K2)
 
         # DO NOT CHANGE HERE!
         self.K1 = K1
@@ -34,20 +39,17 @@ class Q3(Q2):
     """
     def essential_matrix(self, F, K1, K2):
         """
-        Write your own code here 
-
-
-        
-
-        replace pass by your implementation
+        Write your own code here
         """
-        pass
-
+        E = K2.T @ F @ K1
+        return E
 
 
 if __name__ == "__main__":
 
     Q3 = Q3()
-    print("Essential Matrix : ", Q3.E)
-
+    print("-"*30)
+    print("Essential Matrix:")
+    print(Q3.E)
+    print("-"*30)
 
