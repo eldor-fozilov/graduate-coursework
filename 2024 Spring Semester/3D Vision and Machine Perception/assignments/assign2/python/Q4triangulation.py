@@ -1,3 +1,4 @@
+import re
 import numpy as np
 import helper as hlp
 from Q3essential_matrix import Q3
@@ -38,7 +39,9 @@ class Q4(Q3):
         Ext2_cands = hlp.camera2(self.E)
         num_cands = len(Ext2_cands)
 
-        valid_3d_pts_num_for_cands = {}
+        valid_pts3d_num_for_cands = {}
+        valid_cands_idx = []
+        valid_pts3d_and_P = []
 
         for cand_idx in range(num_cands):
 
@@ -46,15 +49,33 @@ class Q4(Q3):
             pts3d = self.triangulate(P1, self.pts1, P2_cand, self.pts2)
 
             # Count the number of valid 3D points
-            valid_3d_pts_num_for_cands[f'P2 Candidate {cand_idx + 1}'] = np.sum(
+            valid_pts3d_num_for_cands[f'P2 Candidate {cand_idx + 1}'] = np.sum(
                 pts3d[:, 2] > 0)
 
-        print(valid_3d_pts_num_for_cands)
-        max_idx = np.argmax(list(valid_3d_pts_num_for_cands.values()))
-        print("Chosen P2 Candidate:", max_idx + 1)
+            # Store the index and 3D points if the candidate has more than 0 valid 3D points
+            if valid_pts3d_num_for_cands[f'P2 Candidate {cand_idx + 1}'] > 0:
+                valid_cands_idx.append(cand_idx)
+                valid_pts3d_and_P.append((pts3d, P2_cand))
 
-        Ext2 = Ext2_cands[max_idx]
-        P2 = self.K2 @ Ext2
+        self.valid_pts3d_num_for_cands = valid_pts3d_num_for_cands
+
+        # Choose the candidate with the smallest reprojection error
+
+        valid_cands_reproj_err = {}
+        for cand_idx in range(len(valid_cands_idx)):
+            cand_pts3d, P2_cand = valid_pts3d_and_P[cand_idx]
+            reproj_err = hlp.compute_reprojerr(P2_cand, self.pts2, cand_pts3d)
+            valid_cands_reproj_err[f'P2 Candidate {valid_cands_idx[cand_idx] + 1}'] = reproj_err
+
+        self.valid_cands_reproj_err = valid_cands_reproj_err
+
+        best_cand_idx = np.argmin(list(valid_cands_reproj_err.values()))
+        best_cand = valid_cands_idx[best_cand_idx]
+
+        self.best_cand = best_cand
+
+        P2 = valid_pts3d_and_P[best_cand_idx][1]
+        Ext2 = Ext2_cands[best_cand]
 
         # DO NOT CHANGE HERE!
         self.Ext1, self.Ext2 = Ext1, Ext2
@@ -94,4 +115,9 @@ class Q4(Q3):
 if __name__ == "__main__":
 
     Q4 = Q4()
+    print("-" * 30)
+    print(Q4.valid_pts3d_num_for_cands)
+    print(Q4.valid_cands_reproj_err)
+    print("Best P2 Candidate Index: ", Q4.best_cand + 1)
+    print("-" * 30)
     print("Ext2=", Q4.Ext2)

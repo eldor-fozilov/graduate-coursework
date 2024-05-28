@@ -7,6 +7,7 @@ import scipy.optimize
 import numpy.linalg as la
 import matplotlib.pyplot as plt
 
+
 def _epipoles(E):
     U, S, V = la.svd(E)
     e1 = V[-1, :]
@@ -26,7 +27,8 @@ def displayEpipolarF(I1, I2, F):
     ax1.set_title('Select a point in this image')
     ax1.set_axis_off()
     ax2.imshow(I2)
-    ax2.set_title('Verify that the corresponding point \n is on the epipolar line in this image')
+    ax2.set_title(
+        'Verify that the corresponding point \n is on the epipolar line in this image')
     ax2.set_axis_off()
 
     while True:
@@ -39,7 +41,7 @@ def displayEpipolarF(I1, I2, F):
         l = F @ v
         s = np.sqrt(l[0]**2+l[1]**2)
 
-        if s==0:
+        if s == 0:
             error('Zero line vector in displayEpipolar')
 
         l = l / s
@@ -78,7 +80,8 @@ def _objective_F(f, pts1, pts2):
 
     r = 0
     for fp1, fp2, hp2 in zip(Fp1.T, FTp2.T, hpts2):
-        r += (hp2.dot(fp1))**2 * (1/(fp1[0]**2 + fp1[1]**2 + fp2[0]**2 + fp2[1]**2))
+        r += (hp2.dot(fp1))**2 * \
+            (1/(fp1[0]**2 + fp1[1]**2 + fp2[0]**2 + fp2[1]**2))
 
     return r
 
@@ -94,47 +97,51 @@ def refineF(F, pts1, pts2):
 
 
 def camera2(E):
-    U,S,V = la.svd(E)
+    U, S, V = la.svd(E)
     m = S[:2].mean()
-    E = U.dot(np.array([[m,0,0], [0,m,0], [0,0,0]])).dot(V)
-    U,S,V = la.svd(E)
-    W = np.array([[0,-1,0], [1,0,0], [0,0,1]])
+    E = U.dot(np.array([[m, 0, 0], [0, m, 0], [0, 0, 0]])).dot(V)
+    U, S, V = la.svd(E)
+    W = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]])
 
-    if la.det(U.dot(W).dot(V))<0:
+    if la.det(U.dot(W).dot(V)) < 0:
         W = -W
 
-    M2s = np.zeros([4,3,4])
-    M2s[0,:,:] = np.concatenate([U.dot(W).dot(V), U[:,2].reshape([-1, 1])/abs(U[:,2]).max()], axis=1)
-    M2s[1,:,:] = np.concatenate([U.dot(W).dot(V), -U[:,2].reshape([-1, 1])/abs(U[:,2]).max()], axis=1)
-    M2s[2,:,:] = np.concatenate([U.dot(W.T).dot(V), U[:,2].reshape([-1, 1])/abs(U[:,2]).max()], axis=1)
-    M2s[3,:,:] = np.concatenate([U.dot(W.T).dot(V), -U[:,2].reshape([-1, 1])/abs(U[:,2]).max()], axis=1)
+    M2s = np.zeros([4, 3, 4])
+    M2s[0, :, :] = np.concatenate(
+        [U.dot(W).dot(V), U[:, 2].reshape([-1, 1])/abs(U[:, 2]).max()], axis=1)
+    M2s[1, :, :] = np.concatenate(
+        [U.dot(W).dot(V), -U[:, 2].reshape([-1, 1])/abs(U[:, 2]).max()], axis=1)
+    M2s[2, :, :] = np.concatenate(
+        [U.dot(W.T).dot(V), U[:, 2].reshape([-1, 1])/abs(U[:, 2]).max()], axis=1)
+    M2s[3, :, :] = np.concatenate(
+        [U.dot(W.T).dot(V), -U[:, 2].reshape([-1, 1])/abs(U[:, 2]).max()], axis=1)
 
     return M2s
 
 
 def _projtrans(H, p):
     n = p.shape[1]
-    p3d = np.vstack((p, np.ones((1,n))))
+    p3d = np.vstack((p, np.ones((1, n))))
     h2d = H @ p3d
-    p2d = h2d[:2,:] / np.vstack((h2d[2,:], h2d[2,:]))
+    p2d = h2d[:2, :] / np.vstack((h2d[2, :], h2d[2, :]))
     return p2d
 
 
 def _mcbbox(s1, s2, M1, M2):
-    roi1 = np.array([[0,0,s1[1],s1[1]],
-                 [0,s1[0],0,s1[0]]])
+    roi1 = np.array([[0, 0, s1[1], s1[1]],
+                     [0, s1[0], 0, s1[0]]])
     roi1p = _projtrans(M1, roi1)
-    bb1 = [np.floor(np.amin(roi1p[0,:])),
-           np.floor(np.amin(roi1p[1,:])),
-           np.ceil(np.amax(roi1p[0,:])),
-           np.ceil(np.amax(roi1p[1,:]))]
+    bb1 = [np.floor(np.amin(roi1p[0, :])),
+           np.floor(np.amin(roi1p[1, :])),
+           np.ceil(np.amax(roi1p[0, :])),
+           np.ceil(np.amax(roi1p[1, :]))]
 
-    roi2 = np.array([[0,0,s2[1],s2[1]], [0,s2[0],0,s2[0]]])
+    roi2 = np.array([[0, 0, s2[1], s2[1]], [0, s2[0], 0, s2[0]]])
     roi2p = _projtrans(M2, roi2)
-    bb2 = [np.floor(np.amin(roi2p[0,:])),
-           np.floor(np.amin(roi2p[1,:])),
-           np.ceil(np.amax(roi2p[0,:])),
-           np.ceil(np.amax(roi2p[1,:]))]
+    bb2 = [np.floor(np.amin(roi2p[0, :])),
+           np.floor(np.amin(roi2p[1, :])),
+           np.ceil(np.amax(roi2p[0, :])),
+           np.ceil(np.amax(roi2p[1, :]))]
 
     bb = np.vstack((bb1, bb2))
     bbmin = np.amin(bb, axis=0)
@@ -146,7 +153,7 @@ def _mcbbox(s1, s2, M1, M2):
 
 def _imwarp(I, H, bb):
     s = (int(bb[2]-bb[0]), int(bb[3]-bb[1]))
-    T = np.array([[1,0,-bb[0]],[0,1,-bb[1]],[0,0,1]])
+    T = np.array([[1, 0, -bb[0]], [0, 1, -bb[1]], [0, 0, 1]])
     H = H @ T
     I = cv.warpPerspective(I, H, s)
 
@@ -160,3 +167,14 @@ def warpStereo(I1, I2, M1, M2):
     I2p = _imwarp(I2, M2, bb)
 
     return I1p, I2p, bb
+
+
+def compute_reprojerr(P, pts, pts3d):
+
+    pts3d_homo = np.hstack((pts3d, np.ones((len(pts3d), 1))))
+    pts_pred = P @ pts3d_homo.T
+    pts_pred = pts_pred[:2] / pts_pred[2]
+
+    reprojerr = np.mean(np.linalg.norm(pts - pts_pred.T, axis=1))
+
+    return reprojerr
