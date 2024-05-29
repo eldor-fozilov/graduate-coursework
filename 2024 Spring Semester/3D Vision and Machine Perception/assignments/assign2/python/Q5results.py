@@ -56,12 +56,20 @@ class Q5(Q4):
         """
 
         pts3d_homo = np.hstack((pts3d, np.ones((len(pts3d), 1))))
-        pts1_pred = P1 @ pts3d_homo.T
-        pts1_pred = pts1_pred[:2] / pts1_pred[2]
+        pts1_pred_image1 = P1 @ pts3d_homo.T
+        pts1_pred_image1 = pts1_pred_image1[:2] / pts1_pred_image1[2]
 
-        reprojerr = np.mean(np.linalg.norm(pts1 - pts1_pred.T, axis=1))
+        pts1_pred_image2 = P2 @ pts3d_homo.T
+        pts1_pred_image2 = pts1_pred_image2[:2] / pts1_pred_image2[2]
 
-        return reprojerr
+        reprojerr_image1 = np.mean(np.linalg.norm(
+            pts1 - pts1_pred_image1.T, axis=1))
+        reprojerr_image2 = np.mean(np.linalg.norm(
+            pts2 - pts1_pred_image2.T, axis=1))
+
+        average_reprojerr = (reprojerr_image1 + reprojerr_image2) / 2
+
+        return average_reprojerr
 
     def vis_pts3d(self, pts3d):
         """

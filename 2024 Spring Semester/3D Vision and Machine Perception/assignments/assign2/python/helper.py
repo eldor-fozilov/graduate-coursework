@@ -167,14 +167,3 @@ def warpStereo(I1, I2, M1, M2):
     I2p = _imwarp(I2, M2, bb)
 
     return I1p, I2p, bb
-
-
-def compute_reprojerr(P, pts, pts3d):
-
-    pts3d_homo = np.hstack((pts3d, np.ones((len(pts3d), 1))))
-    pts_pred = P @ pts3d_homo.T
-    pts_pred = pts_pred[:2] / pts_pred[2]
-
-    reprojerr = np.mean(np.linalg.norm(pts - pts_pred.T, axis=1))
-
-    return reprojerr
