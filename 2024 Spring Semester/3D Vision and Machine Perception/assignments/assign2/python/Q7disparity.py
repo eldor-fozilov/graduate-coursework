@@ -25,8 +25,8 @@ class Q7(Q6):
 
         """
 
-        min_disp = 370
         num_disp = 60
+        min_disp = 370
         self.window_size = 11
         dispM = self.get_disparity(
             self.I1, self.I2, self.window_size, min_disp, num_disp)
